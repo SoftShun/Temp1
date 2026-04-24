@@ -18,4 +18,8 @@ if [ -d docs/designs ]; then
   [ -n "$latest_design" ] && printf 'latest design: %s\n' "$latest_design"
 fi
 
+if [ -f .claude/context/pack.md ]; then
+  printf 'context pack available: .claude/context/pack.md (Read this first to restore flow)\n'
+fi
+
 exit 0

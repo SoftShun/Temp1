@@ -59,7 +59,20 @@ PR 또는 큰 변경 전 `/cross-review`:
 ## Automated guardrails (hooks)
 - **UserPromptSubmit** 훅이 매 프롬프트에 `[state] branch=… tree=… latest_design=…` 를 주입한다 → 방향 이탈·dirty 누적·설계 미갱신이 매 턴 자동 환기된다.
 - **PreToolUse(Bash)** 훅이 `git commit` 호출 직전 커밋 메시지를 검사 → Claude/AI trailer가 있으면 exit 2로 즉시 차단한다. 차단되면 trailer를 제거한 메시지로 재시도한다.
-- **SessionStart** 훅이 세션 시작·재개 시 같은 상태 한 줄 + 최신 설계 문서 경로를 출력한다.
+- **SessionStart** 훅이 세션 시작·재개 시 상태 + 최신 설계 문서 경로 + 컨텍스트 팩 존재 여부를 출력한다.
+- **PreCompact** 훅이 compact 직전 현재 상태를 `.claude/context/pack.md`에 동결한다. 수동으로는 `/snapshot`.
+
+## Context management
+긴 세션·여러 세션·`/compact` 이후에도 흐름을 잃지 않기 위한 3중 장치:
+
+1. **영구 문서** — PRD·설계·ADR·태스크·history는 모두 파일이다. 세션이 초기화돼도 파일은 남는다. 복원의 1차 소스는 **항상 파일**이지 대화 기록이 아니다.
+2. **컨텍스트 팩** (`.claude/context/pack.md`, gitignored) — `/compact` 직전에 PreCompact 훅이 자동으로, 또는 `/snapshot`으로 수동 갱신. 포함: 현재 브랜치/dirty, 최근 커밋 10개, 최신 PRD/설계/ADR/태스크 경로, 열린 태스크(status ≠ done). **세션 재개 시 가장 먼저 이 파일을 읽는다.**
+3. **session-log** (`docs/history/YYYY-MM-DD-*.md`) — 세션 말미 `/session-log`로 "무엇을 왜 했나 + 다음에 할 것"을 600단어 이내로 영구 기록. 팩은 휘발성(현재 상태), history는 비가역(왜 이렇게 됐나).
+
+### 규칙
+- compact 후 첫 턴은 반드시 `.claude/context/pack.md`와 가장 최근 `docs/history/*.md`를 Read로 로드한 뒤에 진행한다. 기억에 의존해 답하지 않는다.
+- 중대 결정이 떠오르면 세션 중이라도 `/adr`로 즉시 파일화한다 — compact가 날 경우를 전제한다.
+- 열린 태스크는 `docs/tasks/T-NNN-*.md`의 `Status:` 필드로만 추적한다. 채팅 속 todo는 팩 갱신 직후 휘발된다.
 
 ## Guardrails (.claude/settings.json)
 - `git push`, `rm -rf`, `git reset --hard` 는 ask 게이트.

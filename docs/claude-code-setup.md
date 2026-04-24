@@ -28,9 +28,13 @@
 - `/security-review` — 내장 `security-review` 스킬 래퍼.
 
 ## Hooks (`.claude/hooks/`)
-- `session-start.sh` (SessionStart: startup|resume) — 브랜치·upstream·dirty + 최신 설계 문서 경로 출력. 세션 차단 안 함.
-- `user-prompt-context.sh` (UserPromptSubmit) — 매 프롬프트에 `[state] branch=… tree=… latest_design=…` 헤더 주입. 방향 이탈·설계 누락을 매 턴 자동 환기.
-- `pre-commit-guard.sh` (PreToolUse, matcher=`Bash`) — `git commit` 호출 직전 메시지에서 Claude/AI trailer(`claude.ai/code`, `Co-authored-by: Claude`, `🤖 Generated with`, `Anthropic`) 검출 시 exit 2로 차단.
+- `session-start.sh` (SessionStart: startup|resume) — 브랜치·upstream·dirty + 최신 설계 문서 경로 + 컨텍스트 팩 존재 여부 출력.
+- `user-prompt-context.sh` (UserPromptSubmit) — 매 프롬프트에 `[state] branch=… tree=… latest_design=…` 헤더 주입.
+- `pre-commit-guard.sh` (PreToolUse, matcher=`Bash`) — `git commit` 호출 직전 메시지에서 Claude/AI trailer 검출 시 exit 2로 차단.
+- `pre-compact.sh` (PreCompact) — compact 직전 현재 상태를 `.claude/context/pack.md`에 동결. 포함: git 상태·최근 커밋 10개·최신 PRD/설계/ADR/태스크 경로·열린 태스크. 수동으로는 `/snapshot`.
+
+## Context management
+`.claude/context/pack.md`(gitignored)와 `docs/history/*.md`(영구)를 2중으로 유지한다. compact 후 첫 턴은 반드시 팩을 먼저 Read 한 뒤 진행한다. 자세한 규칙은 `CLAUDE.md`의 "Context management" 섹션 참고.
 
 ## MCP (`.mcp.json`)
 - `context7` — 최신 라이브러리 문서 즉시 주입. API 키는 `CONTEXT7_API_KEY` 환경변수 참조, 커밋 금지.
