@@ -14,9 +14,16 @@
 | `doc-writer` | haiku | markdown 문서 작성·수정 |
 
 ## Slash Commands (`.claude/commands/`)
-- `/design <topic>` — `architect` → 내장 `Plan` 이중 검증(ultrathink). 설계 합의 전 구현 금지.
-- `/cross-review [ref|path]` — 리뷰어 4종(위 표) **병렬** + 사용자 로컬 Codex = 5관점. Blockers/Agrees/Disagrees/Gaps/QA plan 통합.
-- `/commit-msg` — staged diff → Conventional Commits 초안 (실제 커밋 X).
+문서화 파이프라인:
+- `/prd <slug>` — Product Requirements Document 작성 → `docs/prd/<slug>.md`.
+- `/design <topic>` — ultrathink + architect + 내장 Plan 이중 검증 → `docs/designs/<slug>.md`.
+- `/task-breakdown [path]` — PRD/설계를 `docs/tasks/T-NNN-<slug>.md` 다수로 분해.
+- `/adr <title>` — ADR 자동 번호 할당 → `docs/adr/NNN-<slug>.md`.
+- `/session-log [slug]` — 세션 요약 → `docs/history/YYYY-MM-DD-<slug>.md`.
+
+리뷰·개발 보조:
+- `/cross-review [ref|path]` — 리뷰어 4종 **병렬** + 사용자 로컬 Codex = 5관점. Blockers/Agrees/Disagrees/Gaps/QA plan 통합.
+- `/commit-msg` — staged diff → Conventional Commits 초안(커밋 X).
 - `/summarize-diff` — 작업 트리 변경 한눈 요약 + 위험 플래그.
 - `/security-review` — 내장 `security-review` 스킬 래퍼.
 
